@@ -17,7 +17,6 @@ export type FitBoth = 2;
 export type Source = {
   body?: string | FormField[],
   cache?: boolean,
-  cacheFileName?: string,
   expiration?: number,
   headers?: { [key: string]: string },
   method?: Methods,
@@ -32,7 +31,8 @@ export type TableContent = {
 };
 
 export type Props = {
-  renderActivityIndicator?: (progress: number) => Node,
+  activityIndicator?: Node,
+  activityIndicatorProps?: { [prop: string]: mixed },
   enableAnnotationRendering?: boolean,
   enableAntialiasing?: boolean,
   enablePaging?: boolean,
@@ -41,7 +41,6 @@ export type Props = {
   horizontal?: boolean,
   maxScale?: number,
   minScale?: number,
-  singlePage?: boolean,
   onError?: (error: Error) => void,
   onLoadComplete?: (numberOfPages: number, path: string, size: { height: number, width: number }, tableContents: ?TableContent[]) => void,
   onLoadProgress?: (percent: number) => void,
@@ -58,6 +57,4 @@ export type Props = {
   testID?: string
 };
 
-declare export default class Pdf extends Component<Props> {
-  setPage: (pageNumber: number) => void;
-}
+declare export default class Pdf extends Component<Props> {}

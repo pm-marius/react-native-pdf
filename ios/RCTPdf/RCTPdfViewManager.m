@@ -20,7 +20,7 @@ RCT_EXPORT_MODULE()
 {
     if([[[UIDevice currentDevice] systemVersion] compare:@"11.0" options:NSNumericSearch] == NSOrderedDescending
        || [[[UIDevice currentDevice] systemVersion] compare:@"11.0" options:NSNumericSearch] == NSOrderedSame) {
-        return [[RCTPdfView alloc] initWithBridge:self.bridge];
+        return [[RCTPdfView alloc] init];
     } else {
         return NULL;
     }
@@ -40,7 +40,6 @@ RCT_EXPORT_VIEW_PROPERTY(fitPolicy, int);
 RCT_EXPORT_VIEW_PROPERTY(spacing, int);
 RCT_EXPORT_VIEW_PROPERTY(password, NSString);
 RCT_EXPORT_VIEW_PROPERTY(onChange, RCTBubblingEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(singlePage, BOOL);
 
 RCT_EXPORT_METHOD(supportPDFKit:(RCTResponseSenderBlock)callback)
 {

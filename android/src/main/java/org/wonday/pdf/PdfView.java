@@ -10,7 +10,6 @@ package org.wonday.pdf;
 
 import java.io.File;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,15 +49,11 @@ import com.facebook.common.logging.FLog;
 import com.facebook.react.common.ReactConstants;
 
 import static java.lang.String.format;
-
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.lang.ClassCastException;
 
 import com.shockwave.pdfium.PdfDocument;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.shockwave.pdfium.util.SizeF;
 
 public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompleteListener,OnErrorListener,OnTapListener,OnDrawListener,OnPageScrollListener, LinkHandler {
     private ThemedReactContext context;
@@ -79,7 +74,6 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
     private boolean pageFling = false;
     private boolean pageSnap = false;
     private FitPolicy fitPolicy = FitPolicy.WIDTH;
-    private boolean singlePage = false;
 
     private static PdfView instance = null;
 
@@ -112,14 +106,14 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
 
     @Override
     public void loadComplete(int numberOfPages) {
-        SizeF pageSize = getPageSize(0);
-        float width = pageSize.getWidth();
-        float height = pageSize.getHeight();
+
+        float width = this.getWidth();
+        float height = this.getHeight();
 
         this.zoomTo(this.scale);
         WritableMap event = Arguments.createMap();
 
-        //create a new json Object for the TableOfContents
+        //create a new jason Object for the TableofContents
         Gson gson = new Gson();
         event.putString("message", "loadComplete|"+numberOfPages+"|"+width+"|"+height+"|"+gson.toJson(this.getTableOfContents()));
         ReactContext reactContext = (ReactContext)this.getContext();
@@ -226,27 +220,13 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
             Constants.Pinch.MINIMUM_ZOOM = this.minScale;
             Constants.Pinch.MAXIMUM_ZOOM = this.maxScale;
 
-            Configurator configurator;
-
-            if (this.path.startsWith("content://")) {
-                ContentResolver contentResolver = getContext().getContentResolver();
-                InputStream inputStream = null;
-                Uri uri = Uri.parse(this.path);
-                try {
-                    inputStream = contentResolver.openInputStream(uri);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e.getMessage());
-                }
-                configurator = this.fromStream(inputStream);
-            } else {
-                configurator = this.fromUri(getURI(this.path));
-            }
-
-            configurator.defaultPage(this.page-1)
+            this.fromUri(getURI(this.path))
+                .defaultPage(this.page-1)
                 .swipeHorizontal(this.horizontal)
                 .onPageChange(this)
                 .onLoad(this)
                 .onError(this)
+                .onTap(this)
                 .onDraw(this)
                 .onPageScroll(this)
                 .spacing(this.spacing)
@@ -256,19 +236,10 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
                 .pageSnap(this.pageSnap)
                 .autoSpacing(this.autoSpacing)
                 .pageFling(this.pageFling)
-                .enableSwipe(!this.singlePage)
-                .enableDoubletap(!this.singlePage)
                 .enableAnnotationRendering(this.enableAnnotationRendering)
-                .linkHandler(this);
+                .linkHandler(this)
+                .load();
 
-            if (this.singlePage) {
-                configurator.pages(this.page-1);
-                setTouchesEnabled(false);
-            } else {
-                configurator.onTap(this);
-            }
-
-            configurator.load();
         }
     }
 
@@ -344,10 +315,6 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
 
     }
 
-    public void setSinglePage(boolean singlePage) {
-        this.singlePage = singlePage;
-    }
-
     /**
      * @see https://github.com/barteksc/AndroidPdfViewer/blob/master/android-pdf-viewer/src/main/java/com/github/barteksc/pdfviewer/link/DefaultLinkHandler.java
      */
@@ -394,30 +361,5 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
           return Uri.fromFile(new File(uri));
         }
         return parsed;
-    }
-
-    private void setTouchesEnabled(final boolean enabled) {
-        setTouchesEnabled(this, enabled);
-    }
-
-    private static void setTouchesEnabled(View v, final boolean enabled) {
-        if (enabled) {
-            v.setOnTouchListener(null);
-        } else {
-            v.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return true;
-                }
-            });
-        }
-
-        if (v instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) v;
-            for (int i = 0; i < vg.getChildCount(); i++) {
-                View child = vg.getChildAt(i);
-                setTouchesEnabled(child, enabled);
-            }
-        }
     }
 }

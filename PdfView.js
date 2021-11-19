@@ -37,7 +37,6 @@ export default class PdfView extends Component {
         horizontal: PropTypes.bool,
         page: PropTypes.number,
         currentPage: PropTypes.number,
-        singlePage: PropTypes.bool,
         onPageSingleTap: PropTypes.func,
         onScaleChanged: PropTypes.func,
     };
@@ -56,7 +55,6 @@ export default class PdfView extends Component {
         page: 1,
         currentPage: -1,
         enablePaging: false,
-        singlePage: false,
         onPageSingleTap: (page, x, y) => {
         },
         onScaleChanged: (scale) => {
@@ -162,7 +160,7 @@ export default class PdfView extends Component {
         let fitPolicy = this.props.fitPolicy;
 
         // if only one page, show whole page in center
-        if (this.state.numberOfPages === 1 || this.props.singlePage) {
+        if (this.state.numberOfPages === 1) {
             fitPolicy = 2;
         }
 
@@ -189,7 +187,7 @@ export default class PdfView extends Component {
         let fitPolicy = this.props.fitPolicy;
 
         // if only one page, show whole page in center
-        if (this.state.numberOfPages === 1 || this.props.singlePage) {
+        if (this.state.numberOfPages === 1) {
             fitPolicy = 2;
         }
 
@@ -259,24 +257,6 @@ export default class PdfView extends Component {
     };
 
     _renderItem = ({item, index}) => {
-        const pageView = (
-            <PdfPageView
-                accessible={true}
-                key={item.id}
-                fileNo={this.state.fileNo}
-                page={item.key + 1}
-                width={this._getPageWidth()}
-                height={this._getPageHeight()}
-            />
-        )
-
-        if (this.props.singlePage) {
-            return (
-                <View style={{flexDirection: this.props.horizontal ? 'row' : 'column'}} >
-                    {pageView}
-                </View>
-            )
-        }
 
         return (
             <DoubleTapView style={{flexDirection: this.props.horizontal ? 'row' : 'column'}}
@@ -287,7 +267,14 @@ export default class PdfView extends Component {
                                this._onItemDoubleTap(index);
                            }}
             >
-                {pageView}
+                <PdfPageView
+                    accessible={true}
+                    key={item.id}
+                    fileNo={this.state.fileNo}
+                    page={item.key + 1}
+                    width={this._getPageWidth()}
+                    height={this._getPageHeight()}
+                />
                 {(index !== this.state.numberOfPages - 1) && this._renderSeparator()}
             </DoubleTapView>
         );
@@ -331,14 +318,10 @@ export default class PdfView extends Component {
     };
 
     _renderList = () => {
-        let data = [];
 
-        if (this.props.singlePage) {
-            data[0] = {key: this.props.currentPage >= 0 ? this.props.currentPage : 0}
-        } else {
-            for (let i = 0; i < this.state.numberOfPages; i++) {
-                data[i] = {key: i};
-            }
+        let data = [];
+        for (let i = 0; i < this.state.numberOfPages; i++) {
+            data[i] = {key: i};
         }
 
         return (
@@ -367,7 +350,6 @@ export default class PdfView extends Component {
                 viewabilityConfig={VIEWABILITYCONFIG}
                 onScroll={this._onScroll}
                 onContentSizeChange={this._onListContentSizeChange}
-                scrollEnabled={!this.props.singlePage}
             />
         );
 
@@ -384,16 +366,6 @@ export default class PdfView extends Component {
 
 
     render() {
-        if (this.props.singlePage) {
-            return (
-                <View
-                    style={styles.container}
-                    onLayout={this._onLayout}
-                >
-                    {this.state.pdfLoaded && this._renderList()}
-                </View>
-            )
-        }
 
         return (
             <PinchZoomView
