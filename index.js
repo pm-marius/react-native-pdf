@@ -392,7 +392,7 @@
      render() {
          if (Platform.OS === "android" || Platform.OS === "ios") {
                  return (
-                     <View style={[this.props.style,{overflow: 'hidden'}]}>
+                     <View style={[{flex: 1, overflow: 'hidden'}]}>
                          {!this.state.isDownloaded?
                              (<View
                                  style={styles.progressContainer}
@@ -417,7 +417,7 @@
                                          <PdfCustom
                                              ref={component => (this._root = component)}
                                              {...this.props}
-                                             style={[{flex:1,backgroundColor: '#EEE', flex: 1}]}
+                                             style={[{backgroundColor: '#EEE', flex: 1}, this.props.style]}
                                              path={this.state.path}
                                              onChange={this._onChange}
                                          />
@@ -426,13 +426,13 @@
                                                  <PdfCustom
                                                      ref={component => (this._root = component)}
                                                      {...this.props}
-                                                     style={[{backgroundColor: '#EEE',overflow: 'hidden', flex: 1}]}
+                                                     style={[{backgroundColor: '#EEE',overflow: 'hidden', flex: 1}, this.props.style]}
                                                      path={this.state.path}
                                                      onChange={this._onChange}
                                                  />
                                              ):(<PdfView
                                                  {...this.props}
-                                                 style={[{backgroundColor: '#EEE',overflow: 'hidden', flex: 1}]}
+                                                 style={[{backgroundColor: '#EEE',overflow: 'hidden', flex: 1}, this.props.style]}
                                                  path={this.state.path}
                                                  onLoadComplete={this.props.onLoadComplete}
                                                  onPageChanged={this.props.onPageChanged}
